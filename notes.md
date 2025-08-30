@@ -33,3 +33,7 @@ The command to run is `docker run --rm confluentinc/confluent-local:7.5.0 kafka-
 mvn clean package
 java -jar ./target/kafka-producer-consumer-1.0-SNAPSHOT.jar
 ```
+
+# Manual Commits
+
+To commit an offset is like putting a bookmark: "I read up to this point". The consumer can auto-commit (which is the default), but for better fault-tolerance it is better to commit manually.

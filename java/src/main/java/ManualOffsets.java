@@ -13,13 +13,13 @@ import java.util.Collections;
 import java.util.Properties;
 import java.util.concurrent.ExecutionException;
 
-public class KafkaProducerConsumer {
+public class ManualOffsets {
   private static final String BOOTSTRAP_SERVERS = "localhost:9092";
   private static final String TOPIC = "my_first_topic";
 
   public static void main(String[] args) {
     // Run the producer in a separate thread
-    Thread producerThread = new Thread(KafkaProducerConsumer::runProducer);
+    Thread producerThread = new Thread(ManualOffsets::runProducer);
     producerThread.start();
 
     // Run the consumer in the main thread
@@ -62,6 +62,9 @@ public class KafkaProducerConsumer {
     props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
     props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest"); // Start reading from the beginning of the topic
 
+    // Disable offset auto-commit
+    props.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "false");
+
     try (KafkaConsumer<String, String> consumer = new KafkaConsumer<>(props)) {
       System.out.println("Starting consumer...");
       consumer.subscribe(Collections.singletonList(TOPIC));
@@ -73,6 +76,10 @@ public class KafkaProducerConsumer {
           System.out.printf("Consumed message from topic '%s', partition %d, offset %d, key '%s', value '%s'%n",
               record.topic(), record.partition(), record.offset(), record.key(), record.value());
         }
+
+        // Manually commit offset only after all records are processed
+        consumer.commitSync();
+        System.out.println("Offset committato manualmente.");
       }
     } catch (Exception e) {
       e.printStackTrace();
