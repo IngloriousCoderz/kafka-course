@@ -1,4 +1,6 @@
 from confluent_kafka import Producer
+import time
+import random
 
 # Configuration for your Kafka broker
 conf = {'bootstrap.servers': 'localhost:9092'}
@@ -9,16 +11,25 @@ producer = Producer(conf)
 # The topic you want to send the message to
 topic_name = 'my_first_topic'
 
-# The message you want to send
-message_key = 'my-key'
-message_value = 'Hello from the producer!'
+print("Starting to send messages...")
 
-# Produce the message to the topic
-producer.produce(topic_name, key=message_key.encode(
-    'utf-8'), value=message_value.encode('utf-8'))
+try:
+  for i in range(20):
+    # Create a dynamic key to ensure messages are distributed across partitions
+    message_key = f'key-{random.randint(1, 4)}'
+    message_value = f'Message number {i+1} sent with key {message_key}'
 
-# Wait for the message to be delivered to the broker
-producer.flush()
+    # Produce the message to the topic
+    producer.produce(topic_name, key=message_key.encode(
+        'utf-8'), value=message_value.encode('utf-8'))
 
-print(
-    f"Message '{message_value}' sent to topic '{topic_name}' with key '{message_key}'.")
+    # Add a small delay to make the output more readable
+    time.sleep(1)
+
+  # Wait for all messages to be delivered to the broker
+  producer.flush()
+
+  print("Finished sending messages.")
+
+except Exception as e:
+  print(f"An error occurred: {e}")

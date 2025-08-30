@@ -37,3 +37,13 @@ java -jar ./target/kafka-producer-consumer-1.0-SNAPSHOT.jar
 # Manual Commits
 
 To commit an offset is like putting a bookmark: "I read up to this point". The consumer can auto-commit (which is the default), but for better fault-tolerance it is better to commit manually.
+
+# New User Reads Past Messages
+
+If a new user that enters a group chat, to allow them to read past messages we need to assign the user to a temporary group (this will make it consume all past messages), and then reassign them to the original group.
+
+# Why Polling Instead Of Real-Time?
+
+1. Connection Management & Scalability: With Kafka's pull model, the consumer only opens a connection when it needs to poll for data. This is an intermittent, short-lived connection. When you have thousands or even millions of consumers, the broker doesn't have to manage a persistent, open socket for each one (or face the burden of re-establishing the connection every time). This is highly efficient and scales well.
+2. Resource Consumption and Cost: By pulling data in batches, the network overhead is significantly reduced. Instead of sending a tiny message for every single new chat message, the consumer fetches a handful of messages in a single request, which is far more efficient. This saves on network bandwidth and processing power.
+3. Backpressure and Reliability: The consumer controls the flow. If a user's device is slow or their network connection is poor, the consumer can simply stop polling for a moment without a "down" message from the server. Once the device catches up, it can resume polling. This is a robust mechanism for handling backpressure and ensuring reliability.

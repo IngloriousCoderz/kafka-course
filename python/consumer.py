@@ -1,4 +1,5 @@
-from confluent_kafka import Consumer, KafkaException
+from confluent_kafka import Consumer, KafkaException, KafkaError
+import sys
 
 # Configuration for your Kafka broker and consumer group
 conf = {
@@ -15,25 +16,42 @@ consumer = Consumer(conf)
 # Subscribe to the topic
 consumer.subscribe(['my_first_topic'])
 
+print("Starting to consume messages...")
+
 try:
   while True:
     # Poll for new messages every second
     msg = consumer.poll(1.0)
+
     if msg is None:
       continue
+
     if msg.error():
       # Handle any potential errors
-      raise KafkaException(msg.error())
-    else:
-      # Print the message's key and value
-      print(
-          f"Consumed message: key={msg.key().decode('utf-8')}, value={msg.value().decode('utf-8')}")
+      if msg.error().code() == KafkaError._PARTITION_EOF:
+        # End of partition, this is normal and not an error
+        sys.stderr.write('%% %s [%d] reached end of offset %s\n' %
+                         (msg.topic(), msg.partition(), msg.offset()))
+        continue
+      else:
+        # Other errors
+        raise KafkaException(msg.error())
 
-    # Manually commit offsets after the batch is processed
-    consumer.commit()
+    # Process the message's key and value
+    print(
+        f"Consumed message from partition {msg.partition()}: "
+        f"key={msg.key().decode('utf-8')}, value={msg.value().decode('utf-8')}")
+
+    # Manually commit the offset of the message just processed.
+    # This tells Kafka that we have successfully processed messages up to this point.
+    # Using synchronous commit is a safe choice, but can be slow.
+    consumer.commit(asynchronous=False)
     print("Offsets manually committed.")
+
 except KeyboardInterrupt:
-  pass
+  # User interruption, graceful shutdown
+  print("Stopping consumer...")
+
 finally:
-  # Close the consumer when done
+  # Close the consumer when done. This also triggers a rebalance.
   consumer.close()
