@@ -17,10 +17,19 @@ Consider your broker count: It's a good idea to have more partitions than broker
 
 # Python Commands
 
+```bash
 python -m venv .venv
 pip install confluent-kafka
 pip list > requirements.txt
+```
 
 # Creating a CLUSTER_ID
 
 The command to run is `docker run --rm confluentinc/confluent-local:7.5.0 kafka-storage random-uuid`.
+
+# Java Commands
+
+```bash
+mvn clean package
+java -jar ./target/kafka-producer-consumer-1.0-SNAPSHOT.jar
+```

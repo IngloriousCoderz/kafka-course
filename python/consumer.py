@@ -3,7 +3,7 @@ from confluent_kafka import Consumer, KafkaException
 # Configuration for your Kafka broker and consumer group
 conf = {
     'bootstrap.servers': 'localhost:9092',
-    'group.id': 'my-first-consumer-group',
+    'group.id': 'my_first_consumer_group_python',
     'auto.offset.reset': 'earliest'
 }
 
