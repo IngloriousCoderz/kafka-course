@@ -45,5 +45,23 @@ If a new user that enters a group chat, to allow them to read past messages we n
 # Why Polling Instead Of Real-Time?
 
 1. Connection Management & Scalability: With Kafka's pull model, the consumer only opens a connection when it needs to poll for data. This is an intermittent, short-lived connection. When you have thousands or even millions of consumers, the broker doesn't have to manage a persistent, open socket for each one (or face the burden of re-establishing the connection every time). This is highly efficient and scales well.
+
 2. Resource Consumption and Cost: By pulling data in batches, the network overhead is significantly reduced. Instead of sending a tiny message for every single new chat message, the consumer fetches a handful of messages in a single request, which is far more efficient. This saves on network bandwidth and processing power.
+
 3. Backpressure and Reliability: The consumer controls the flow. If a user's device is slow or their network connection is poor, the consumer can simply stop polling for a moment without a "down" message from the server. Once the device catches up, it can resume polling. This is a robust mechanism for handling backpressure and ensuring reliability.
+
+# Monitoring And Logging
+
+Kafka sends metrics through JMX. Prometheus can collect them and Grafana can show them. Kafka UI and AKHQ are ok, but they don't give historical data nor alert in case of issues.
+
+# Geographical Distribution
+
+One area should have one cluster. But if producers are in the US and consumers are in Europe, they need a cluster for each continent plus Kafka MirrorMaker, which should reside close to the origin cluster (so the US in our example).
+
+In case producers and consumers are scattered between both continents, we need two MirrorMaker instances.
+
+# Kafka Streams
+
+It's just a Java library that connects to Kafka. It allows to retrieve, join, filter, and organize data. In Python there's Faust which does the same thing.
+
+It's a higher-level library compared to kafka-clients, and uses kafka-clients under the hood.
