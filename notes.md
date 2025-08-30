@@ -65,3 +65,7 @@ In case producers and consumers are scattered between both continents, we need t
 It's just a Java library that connects to Kafka. It allows to retrieve, join, filter, and organize data. In Python there's Faust which does the same thing.
 
 It's a higher-level library compared to kafka-clients, and uses kafka-clients under the hood.
+
+# ksqlDB
+
+Formerly known as KSQL, it's a server (usually a Docker container) that offers a REPL. You can use syntax that looks very much like SQL for simple stuff instead of creating a whole Java application.
